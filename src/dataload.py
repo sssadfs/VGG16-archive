@@ -15,4 +15,4 @@ transformation = transforms.Compose([
 train_dataset = torchvision.datasets.ImageFolder(root = "../tiny-imagenet-200/train",transform=transformation)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 val_dataset = torchvision.datasets.ImageFolder(root = "../tiny-imagenet-200/val",transform=transformation)
-val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=True)
+val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
