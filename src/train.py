@@ -4,7 +4,7 @@ import time
 import wandb
 from tqdm import tqdm
 
-epochs = 1
+epochs = 30
 learning_rate = 1e-4
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -41,6 +41,16 @@ def train():
                 print(f"Training loss is: {loss.item()}")
                 wandb.log({"train_loss": loss.item()})
 
+            # 梯度累计的写法，应对batch需要较大的情况
+            # accumulation_steps = 4
+            # for batch_idx, (data, target) in enumerate(train_loader):
+            #     ...
+            #     loss = loss_fn(output, target) / accumulation_steps
+            #     loss.backward()
+            #     if (batch_idx + 1) % accumulation_steps == 0:
+            #         optimizer.step()
+            #         optimizer.zero_grad()
+
         val_correct = 0
         val_loss = 0
         net.eval()
@@ -49,7 +59,8 @@ def train():
                 data, target = data.to(device), target.to(device)
                 result = net(data)
                 losses = loss_fn(result, target)
-                val_loss += losses.item()
+                val_loss += losses.item() * data.size(0)  # 乘 batch 大小
+                val_loss /= len(val_loader.dataset) #计算 batch 平均loss
                 val_correct += torch.argmax(result, dim=1).eq(target).sum().item()
 
         total_accuracy = val_correct / len(val_loader.dataset)
@@ -60,4 +71,5 @@ def train():
         torch.save(net.state_dict(), f"../models/VGG16_epoch_{epoch}.pth")
     wandb.finish()
 
-train()
+if __name__ == "__main__":  # 从这里开始运行
+    train()
