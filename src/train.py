@@ -4,11 +4,11 @@ import time
 import wandb
 from tqdm import tqdm
 
-epochs = 30
-learning_rate = 1e-4
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 net = VGG16(num_classes = 200).to(device)
+
+epochs = 2
+learning_rate = 1e-4
 
 loss_fn = nn.CrossEntropyLoss().to(device)
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
@@ -60,15 +60,14 @@ def train():
                 result = net(data)
                 losses = loss_fn(result, target)
                 val_loss += losses.item() * data.size(0)  # 乘 batch 大小
-                val_loss /= len(val_loader.dataset) #计算 batch 平均loss
                 val_correct += torch.argmax(result, dim=1).eq(target).sum().item()
-
+        val_loss /= len(val_loader.dataset)  # 计算 batch 平均loss
         total_accuracy = val_correct / len(val_loader.dataset)
         print(f"Validation loss is: {val_loss}")
         print(f"The accuracy of val dataset is:{total_accuracy}")
         wandb.log({"val_loss": val_loss, "val_accuracy": total_accuracy})
 
-        torch.save(net.state_dict(), f"../models/VGG16_epoch_{epoch}.pth")
+        torch.save(net.state_dict(), f"../checkpoints/VGG16_epoch_{epoch+1}.pth")
     wandb.finish()
 
 if __name__ == "__main__":  # 从这里开始运行

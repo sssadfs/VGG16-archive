@@ -32,7 +32,6 @@ class CustomDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        print(self.samples)
         img_path, label = self.samples[idx]
         image = Image.open(img_path).convert('RGB')
 
